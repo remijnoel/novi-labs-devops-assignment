@@ -1,0 +1,1 @@
+# novi-labs-devops-assignment
