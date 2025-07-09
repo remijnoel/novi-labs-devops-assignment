@@ -26,7 +26,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.ROLE_TO_ASSUME }}
           role-session-name: GithubActionsSession
@@ -66,7 +66,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.ROLE_TO_ASSUME }}
           role-session-name: GithubDeploySession
