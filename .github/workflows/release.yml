@@ -79,7 +79,7 @@ jobs:
 
       - name: Deploy to AWS ECS
         run: |
-          aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} \
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ env.ECS_SERVICE }} \
-            --force-new-deployment \
-            --image ${{ env.IMAGE_URL }}
+            --force-new-deployment
