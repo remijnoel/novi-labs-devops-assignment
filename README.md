@@ -6,7 +6,7 @@
 
 ## CI/CD pipeline
 
-[text](https://github.com/remijnoel/novi-labs-devops-assignment/actions)
+[Github Actions pipeline](https://github.com/remijnoel/novi-labs-devops-assignment/actions)
 
 ## First deployment (initial setup)
 
