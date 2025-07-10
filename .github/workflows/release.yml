@@ -85,7 +85,7 @@ jobs:
         run: terraform init cicd
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve cicd
+        run: terraform -chdir cicd apply -auto-approve
 
   deploy-app-dev:
     name: Deploy app to AWS
@@ -122,7 +122,7 @@ jobs:
           TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $TASK_DEFINITION_ARN)
           
           # Update the image URL in the task definition
-          NEW_TASK_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$NEW_IMAGE_URL" '.taskDefinition.containerDefinitions[0].image = $IMAGE | del(.taskDefinition.taskDefinitionArn) | del(.taskDefinition.revision) | del(.taskDefinition.status) | del(.taskDefinition.requiresAttributes) | del(.taskDefinition.placementConstraints) | del(.taskDefinition.compatibilities) | del(.taskDefinition.registeredAt) | del(.taskDefinition.registeredBy) | del(.taskDefinition.deregisteredAt) | del(.taskDefinition.family) | .')
+          NEW_TASK_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$IMAGE_URL" '.taskDefinition.containerDefinitions[0].image = $IMAGE | del(.taskDefinition.taskDefinitionArn) | del(.taskDefinition.revision) | del(.taskDefinition.status) | del(.taskDefinition.requiresAttributes) | del(.taskDefinition.placementConstraints) | del(.taskDefinition.compatibilities) | del(.taskDefinition.registeredAt) | del(.taskDefinition.registeredBy) | del(.taskDefinition.deregisteredAt) | .taskDefinition')
           
           # Register the new task definition
           aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEFINITION"
