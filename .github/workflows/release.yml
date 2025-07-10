@@ -129,10 +129,12 @@ jobs:
           echo "New Task Definition: $NEW_TASK_DEFINITION"
 
           # Register the new task definition
-          aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEFINITION"
+          OUT=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEFINITION")
+          ARN=$(echo $OUT | jq -r '.taskDefinition.taskDefinitionArn')
 
       - name: Deploy to AWS ECS
         run: |
           aws ecs update-service \
           --cluster ${{ env.ECS_CLUSTER }} \
-          --service ${{ env.ECS_SERVICE }}
+          --service ${{ env.ECS_SERVICE }} \
+          --task-definition $ARN
