@@ -1,5 +1,7 @@
 # novi-labs-devops-assignment
 
+[https://www.novi-labs.infra.rnoel.net](https://www.novi-labs.infra.rnoel.net)
+
 ## Architecture overview
 
 ![Architecture overview](archi.png)
