@@ -117,7 +117,7 @@ jobs:
 
       - name: Create new task definition
         env:
-          NEW_IMAGE_URL: ${{ env.IMAGE_URL }}:${{ github.ref_name }}
+          NEW_IMAGE_URL: "${{ env.IMAGE_URL }}:${{ github.ref_name }}"
         run: |
           # Get the current task definition
           TASK_DEFINITION_ARN=$(aws ecs describe-services --services ${{ env.ECS_SERVICE }} --cluster ${{ env.ECS_CLUSTER }} | jq -r '.services[].taskDefinition')
@@ -130,10 +130,11 @@ jobs:
 
           # Register the new task definition
           OUT=$(aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEFINITION")
-          ARN=$(echo $OUT | jq -r '.taskDefinition.taskDefinitionArn')
+          echo $OUT > task_definition.json
 
       - name: Deploy to AWS ECS
         run: |
+          ARN=$(jq -r '.taskDefinition.taskDefinitionArn' task_definition.json)
           aws ecs update-service \
           --cluster ${{ env.ECS_CLUSTER }} \
           --service ${{ env.ECS_SERVICE }} \
