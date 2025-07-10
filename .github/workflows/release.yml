@@ -13,10 +13,10 @@ env:
   AWS_REGION: us-west-2
   ROLE_TO_ASSUME: arn:aws:iam::144627715252:role/novi-labs-github-actions-role
   IMAGE_URL: 144627715252.dkr.ecr.us-west-2.amazonaws.com/devops-assignment-dev
-  ECS_CLUSTER: devops-assignment-dev-cluster
-  ECS_SERVICE: devops-assignment-dev-service
+  
 
 jobs:
+
   build:
     name: Build and push image
     runs-on: ubuntu-latest
@@ -56,10 +56,46 @@ jobs:
 
       
 
-  deploy:
-    name: Deploy to AWS
+  deploy-infra-dev:
+    name: Deploy infrastructure to AWS
     runs-on: ubuntu-latest
     needs: build
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/add-tf-deploy'
+    env:
+      ECS_CLUSTER: devops-assignment-dev-cluster
+      ECS_SERVICE: devops-assignment-dev-service
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          role-session-name: GithubDeploySession
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init
+        run: terraform init cicd
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve cicd
+
+  deploy-app-dev:
+    name: Deploy app to AWS
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/add-tf-deploy'
+    env:
+      ECS_CLUSTER: devops-assignment-dev-cluster
+      ECS_SERVICE: devops-assignment-dev-service
+
 
     steps:
       - name: Checkout code
@@ -77,9 +113,22 @@ jobs:
         with:
           version: 2
 
+      - name: Create new task definition
+        env:
+          NEW_IMAGE_URL: ${{ env.IMAGE_URL }}:${{ github.ref_name }}
+        run: |
+          # Get the current task definition
+          TASK_DEFINITION_ARN=$(aws ecs describe-services --services ${{ env.ECS_SERVICE }} --cluster ${{ env.ECS_CLUSTER }} | jq -r '.services[].taskDefinition')
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $TASK_DEFINITION_ARN)
+          
+          # Update the image URL in the task definition
+          NEW_TASK_DEFINITION=$(echo $TASK_DEFINITION | jq --arg IMAGE "$NEW_IMAGE_URL" '.taskDefinition.containerDefinitions[0].image = $IMAGE | del(.taskDefinition.taskDefinitionArn) | del(.taskDefinition.revision) | del(.taskDefinition.status) | del(.taskDefinition.requiresAttributes) | del(.taskDefinition.placementConstraints) | del(.taskDefinition.compatibilities) | del(.taskDefinition.registeredAt) | del(.taskDefinition.registeredBy) | del(.taskDefinition.deregisteredAt) | del(.taskDefinition.family) | .')
+          
+          # Register the new task definition
+          aws ecs register-task-definition --cli-input-json "$NEW_TASK_DEFINITION"
+
       - name: Deploy to AWS ECS
         run: |
           aws ecs update-service \
-            --cluster ${{ env.ECS_CLUSTER }} \
-            --service ${{ env.ECS_SERVICE }} \
-            --force-new-deployment
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service ${{ env.ECS_SERVICE }}
