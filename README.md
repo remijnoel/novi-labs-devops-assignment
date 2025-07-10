@@ -1,5 +1,13 @@
 # novi-labs-devops-assignment
 
+## Architecture overview
+
+![Architecture overview](archi.png)
+
+## CI/CD pipeline
+
+[text](https://github.com/remijnoel/novi-labs-devops-assignment/actions)
+
 ## First deployment (initial setup)
 
 ```shell
