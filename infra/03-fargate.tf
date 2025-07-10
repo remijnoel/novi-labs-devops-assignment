@@ -26,6 +26,8 @@ locals {
         entryPoint       = null,
         portMappings = [
           {
+            hostPort      = 80
+            protocol      = "tcp"
             containerPort = 80
           }
         ]
@@ -33,11 +35,13 @@ locals {
         linuxParameters = {
           capabilities = {
             drop = ["NET_RAW"]
+            add  = []
           },
           "initProcessEnabled" : true
         },
-        environment = [],
-        secrets     = [],
+        environment    = [],
+        systemControls = [],
+        secrets        = [],
         logConfiguration = {
           logDriver = "awslogs",
           options = {
