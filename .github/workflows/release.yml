@@ -25,6 +25,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Add commit hash to Index.html
+        run: |
+          sed -i "s/COMMIT_HASH_HERE/${{ github.sha }}/g" app/index.html
+
       - name: Set up AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -98,10 +102,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Add commit hash to Index.html
-        run: |
-          sed -i "s/COMMIT_HASH_HERE/${{ github.sha }}/g" app/index.html
+      
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
