@@ -8,6 +8,8 @@
 
 [text](https://github.com/remijnoel/novi-labs-devops-assignment/actions)
 
+Use dev branch to deploy to dev environment.
+
 ## First deployment (initial setup)
 
 ```shell
